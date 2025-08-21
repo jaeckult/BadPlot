@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme.dart';
 
 void main() {
@@ -73,6 +74,7 @@ class _QuizPageState extends State<QuizPage> {
   List<dynamic> _plots = [];
   int _currentIndex = 0;
   bool _showAnswer = false;
+  static const String _progressKey = 'quiz_progress';
 
   @override
   void initState() {
@@ -83,10 +85,17 @@ class _QuizPageState extends State<QuizPage> {
   Future<void> _loadData() async {
     final String jsonString = await rootBundle.loadString('assets/reddit_posts_top_comment.json');
     final List<dynamic> data = json.decode(jsonString) as List<dynamic>;
+    final prefs = await SharedPreferences.getInstance();
+    final savedProgress = prefs.getInt(_progressKey) ?? 0;
     setState(() {
       _plots = data;
-      _currentIndex = 0;
+      _currentIndex = savedProgress < data.length ? savedProgress : 0;
     });
+  }
+
+  Future<void> _saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_progressKey, _currentIndex);
   }
 
   void _reveal() {
@@ -95,12 +104,22 @@ class _QuizPageState extends State<QuizPage> {
     });
   }
 
+  void _previous() {
+    if (_plots.isEmpty) return;
+    setState(() {
+      _showAnswer = false;
+      _currentIndex = (_currentIndex - 1 + _plots.length) % _plots.length;
+    });
+    _saveProgress();
+  }
+
   void _next() {
     if (_plots.isEmpty) return;
     setState(() {
       _showAnswer = false;
       _currentIndex = (_currentIndex + 1) % _plots.length;
     });
+    _saveProgress();
   }
 
   @override
@@ -117,135 +136,180 @@ class _QuizPageState extends State<QuizPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bad Movie Plots'),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: gradients?.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: loading
-              ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Progress
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: LinearProgressIndicator(
-                                value: (_currentIndex + 1) / _plots.length,
-                                minHeight: 10,
-                                backgroundColor: Colors.white24,
-                                color: colorScheme.onPrimary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            '${_currentIndex + 1}/${_plots.length}',
-                            style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      // Card with plot
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Plot', style: theme.textTheme.titleMedium),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      category,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(question, style: theme.textTheme.bodyLarge),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(
-                                    Icons.thumb_up,
-                                    size: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    upvotes,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+  appBar: AppBar(
+    title: const Text('Bad Movie Plots'),
+    elevation: 0,
+    backgroundColor: Colors.transparent,
+  ),
+  body: Container(
+    decoration: BoxDecoration(
+      gradient: gradients?.backgroundGradient,
+    ),
+    child: SafeArea(
+      child: loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Progress (compact)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${_currentIndex + 1}/${_plots.length}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Buttons
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: _reveal,
-                            child: const Text('Reveal'),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: (_currentIndex + 1) / _plots.length,
+                              minHeight: 6,
+                              backgroundColor: Colors.white24,
+                              color: Colors.white,
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          OutlinedButton(
-                            onPressed: _next,
-                            child: const Text('Next'),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Plot Card (smaller)
+                  Card(
+                    elevation: 6,
+                    margin: EdgeInsets.zero,
+                    shadowColor: Colors.black.withOpacity(0.1),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.28, // reduced
                       ),
-                      const SizedBox(height: 16),
-                      // Animated answer
-                      AnimatedCrossFade(
-                        firstChild: const SizedBox.shrink(),
-                        secondChild: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Text('Answer', style: theme.textTheme.titleMedium),
-                                const SizedBox(height: 8),
-                                Text(answer, style: theme.textTheme.bodyLarge),
+                                Icon(Icons.movie, size: 18, color: theme.colorScheme.primary),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Plot',
+                                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                ),
                               ],
                             ),
-                          ),
+                            const SizedBox(height: 8),
+                            Text(
+                              question,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                height: 1.4,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
-                        crossFadeState: _showAnswer ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                        duration: const Duration(milliseconds: 250),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-        ),
+                  const SizedBox(height: 12),
+
+                  // Buttons (compact)
+                  Row(
+  children: [
+    Expanded(
+      flex: 2, // smaller
+      child: OutlinedButton.icon(
+        onPressed: _previous,
+        icon: const Icon(Icons.arrow_back),
+        label: const Text(''),
       ),
-    );
+    ),
+    const SizedBox(width: 8),
+    Expanded(
+      flex: 4, // bigger space for Reveal
+      child: ElevatedButton.icon(
+        onPressed: _reveal,
+        icon: const Icon(Icons.lightbulb),
+        label: const Text('Reveal'),
+      ),
+    ),
+    const SizedBox(width: 8),
+    Expanded(
+      flex: 2, // smaller
+      child: OutlinedButton.icon(
+        onPressed: _next,
+        icon: const Icon(Icons.arrow_forward),
+        label: const Text(''),
+      ),
+    ),
+  ],
+),
+
+                  const SizedBox(height: 12),
+
+                  // Answer area (fixed height, fade in/out)
+                  AnimatedOpacity(
+  opacity: _showAnswer ? 1.0 : 0.0,
+  duration: const Duration(milliseconds: 300),
+  child: Card(
+    elevation: 6,
+    shadowColor: Colors.black.withOpacity(0.1),
+    color: Colors.green[50],
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // 👈 shrink to fit content
+        children: [
+          Row(
+            children: [
+              Icon(Icons.check_circle, size: 18, color: Colors.green[700]),
+              const SizedBox(width: 6),
+              Text(
+                'Answer',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green[700],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            child: Text(
+              answer,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                height: 1.4,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+],
+              ),
+            ),
+    ),
+  ),
+);
+
   }
 }
 

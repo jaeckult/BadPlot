@@ -5,11 +5,11 @@ class AppTheme {
   static final ThemeData light = ThemeData(
     // Modern color scheme with gradient support
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF6B46C1),
+      seedColor: const Color(0xFF0077B6), // Deep ocean blue
       brightness: Brightness.light,
     ),
-    // Slightly darker scaffold background for contrast
-    scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+    // Slightly lighter scaffold background for freshness
+    scaffoldBackgroundColor: const Color(0xFFF0F8FA),
     // Typography with Poppins for a premium feel
     textTheme: const TextTheme(
       headlineSmall: TextStyle(
@@ -51,7 +51,7 @@ class AppTheme {
         statusBarIconBrightness: Brightness.dark,
       ),
     ),
-    // Neumorphic-inspired card with soft shadows and rounded corners
+    // Neumorphic-inspired card
     cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 6,
@@ -62,7 +62,7 @@ class AppTheme {
       ),
       clipBehavior: Clip.antiAlias,
     ),
-    // Elevated button with gradient and smooth animation
+    // Elevated button
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -72,19 +72,19 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
-        backgroundColor: const Color(0xFF6B46C1),
+        backgroundColor: const Color(0xFF0077B6), // Blue
         foregroundColor: Colors.white,
         shadowColor: Colors.black.withOpacity(0.2),
         elevation: 4,
       ),
     ),
-    // Outlined button with subtle border and hover effect
+    // Outlined button
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         side: BorderSide(
-          color: const Color(0xFF6B46C1).withOpacity(0.6),
+          color: const Color(0xFF00B4D8).withOpacity(0.6), // Teal border
           width: 1.5,
         ),
         textStyle: const TextStyle(
@@ -92,11 +92,11 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
-        foregroundColor: const Color(0xFF6B46C1),
+        foregroundColor: const Color(0xFF00B4D8), // Teal text
         backgroundColor: Colors.white.withOpacity(0.9),
       ),
     ),
-    // Input field with rounded borders and subtle shadow
+    // Input fields
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white.withOpacity(0.95),
@@ -115,7 +115,7 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(
-          color: Color(0xFF6B46C1),
+          color: Color(0xFF0077B6), // Blue when focused
           width: 1.5,
         ),
       ),
@@ -130,16 +130,16 @@ class AppTheme {
         color: Colors.black.withOpacity(0.4),
       ),
     ),
-    // Smooth transitions for animations
+    // Smooth transitions
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.android: ZoomPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       },
     ),
-    // Floating action button with gradient
+    // Floating action button
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: Color(0xFF6B46C1),
+      backgroundColor: Color(0xFF00B4D8), // Teal
       elevation: 4,
       shape: CircleBorder(),
       foregroundColor: Colors.white,
@@ -155,8 +155,9 @@ class AppTheme {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF6B46C1),
-            Color(0xFF9F7AEA),
+            Color(0xFF0077B6), // Blue
+            Color(0xFF00B4D8), // Teal
+            Color(0xFF90E0EF), // Light Aqua
           ],
         ),
       ),
@@ -179,7 +180,6 @@ class AppGradients extends ThemeExtension<AppGradients> {
   @override
   AppGradients lerp(ThemeExtension<AppGradients>? other, double t) {
     if (other is! AppGradients) return this;
-    // We cannot lerp gradients directly; switch at halfway for simplicity
     return t < 0.5 ? this : other;
   }
 }
