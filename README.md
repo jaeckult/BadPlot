@@ -2,9 +2,10 @@
 
 A fun little app that scrapes the web for bad/funny movie plot summaries and pairs them with the top-voted comment/answer.
 
-![photo_1_2025-08-21_23-21-37](https://github.com/user-attachments/assets/6b7efc41-8c25-43c9-92cc-febacb580fae)
-![photo_2_2025-08-21_23-21-37](https://github.com/user-attachments/assets/2d2da398-0d43-40ca-a8c0-55688d9eff43)
-![photo_3_2025-08-21_23-21-37](https://github.com/user-attachments/assets/93cddda0-eb76-4a4f-a2ad-d75e4322ee2e)
+![photo_1_2025-08-21_23-21-37](https://github.com/user-attachments/assets/6b7efc41-8c25-43c9-92cc-febacb580fae){: width="300px"}
+![photo_2_2025-08-21_23-21-37](https://github.com/user-attachments/assets/2d2da398-0d43-40ca-a8c0-55688d9eff43){: width="300px"}
+![photo_3_2025-08-21_23-21-37](https://github.com/user-attachments/assets/93cddda0-eb76-4a4f-a2ad-d75e4322ee2e){: width="300px"}
+
 
 Think of it as a game:
 - Read a ridiculous plot description
